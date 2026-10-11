@@ -2,7 +2,7 @@
 
 用于创作动画视频、生成艺术和交互网页。各作品共用一套 npm 依赖，源码和设计分别放在 `src/projects/<作品名>/`。
 
-工具包括 React / Vite、Remotion、p5.js / p5.brush、Three.js / React Three Fiber、GSAP、Tweakpane，以及 Playwright。依赖版本见 `package.json` 和锁文件；环境使用 Node.js 24 与本机 FFmpeg / ffprobe。
+工具包括 React / Vite、Remotion、p5.js、Three.js / React Three Fiber、GSAP、Tweakpane，以及 Playwright。依赖版本见 `package.json` 和锁文件；环境使用 Node.js 24 与本机 FFmpeg / ffprobe。
 
 - [项目协作与目录约定](AGENTS.md)
 - [安装、恢复和更新](docs/setup-and-updates.md)

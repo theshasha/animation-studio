@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { BrushLab, ParticleLab, ThreeLab } from "./CanvasLab";
+import { ParticleLab, ThreeLab } from "./CanvasLab";
 import "./style.css";
 
 gsap.registerPlugin(useGSAP);
@@ -28,10 +28,9 @@ export const App = () => <main>
   <header><span className="eyebrow">ANIMATION STUDIO / TOOL CHECK</span><h1>让工具真正动起来。</h1><p>移动、拖拽、调色，然后看一段真正导出的短片。</p><a href="http://localhost:3000/ToolCheck" target="_blank" rel="noreferrer">打开 Remotion 时间轴 ↗</a></header>
   <div className="grid">
     <section><div className="heading"><span>01 / GENERATIVE</span><h2>流动的星群</h2><p>p5.js · 移动鼠标，让粒子避开指针。</p></div><ParticleLab /></section>
-    <section><div className="heading"><span>02 / NATURAL MEDIA</span><h2>纸上的色与线</h2><p>p5.brush · 水彩晕染与铅笔笔触，切换种子探索变化。</p></div><BrushLab /></section>
-    <section><div className="heading"><span>03 / WEBGL</span><h2>一枚青色的结</h2><p>Three.js · 拖拽旋转，滚轮缩放，面板调节。</p></div><ThreeLab /></section>
-    <section><div className="heading"><span>04 / CHOREOGRAPHY</span><h2>可以拖动的时间</h2><p>GSAP + React · 暂停、继续与定位。</p></div><TimelineLab /></section>
+    <section><div className="heading"><span>02 / WEBGL</span><h2>一枚青色的结</h2><p>Three.js · 拖拽旋转，滚轮缩放，面板调节。</p></div><ThreeLab /></section>
+    <section className="timeline"><div className="heading"><span>03 / CHOREOGRAPHY</span><h2>可以拖动的时间</h2><p>GSAP + React · 暂停、继续与定位。</p></div><TimelineLab /></section>
   </div>
-  <section className="film"><div className="heading"><span>05 / RENDERED FILM</span><h2>从代码到视频</h2><p>Remotion + Three.js + GSAP · 5 秒 / 30 fps / 960 × 540 · 无音轨</p></div><video controls loop preload="metadata" src={`${import.meta.env.BASE_URL}projects/tool-check/tool-check.mp4`} /><p className="footnote">上方为实际导出的 MP4。音频工具尚未用真实素材验收，本次不生成声音。</p></section>
-  <footer>本页是工具链实测作品 · 素材库保持为空 · 详细结果见项目说明</footer>
+  <section className="film"><div className="heading"><span>04 / RENDERED FILM</span><h2>从代码到视频</h2><p>Remotion + Three.js + GSAP · 5 秒 / 30 fps / 960 × 540 · 无音轨</p></div><video controls loop preload="metadata" src={`${import.meta.env.BASE_URL}projects/tool-check/tool-check.mp4`} /></section>
+  <footer>本页是工具链实测作品 · 详细结果见项目说明</footer>
 </main>;

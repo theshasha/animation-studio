@@ -8,10 +8,11 @@ h1 { font-size: clamp(30px, 4vw, 52px); letter-spacing: -2px; margin: 16px 0; }
 header p { font-size: 15px; color: #627372; }
 header a { display: inline-block; color: #216c64; margin-top: 12px; text-underline-offset: 5px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.timeline { grid-column: 1 / -1; }
 section { background: #fffdf8; border: 1px solid #d8ded7; border-radius: 12px; overflow: hidden; }
 .heading { padding: 24px 28px 18px; }
 h2 { font-size: 24px; margin: 10px 0; font-weight: 600; }
-.heading p, .footnote { font-size: 13px; color: #6b7977; line-height: 1.6; }
+.heading p { font-size: 13px; color: #6b7977; line-height: 1.6; }
 .canvas-host { width: 100%; aspect-ratio: 16/9; overflow: hidden; }
 .canvas-host canvas { display: block; width: 100% !important; height: 100% !important; touch-action: none; }
 .actions { display: flex; gap: 12px; align-items: center; padding: 18px 24px; flex-wrap: wrap; font-size: 12px; }
@@ -26,6 +27,5 @@ input[type=range] { accent-color: #347e73; max-width: 120px; }
 .orb:nth-child(3) { background: #ad974f; }
 .film { margin-top: 24px; }
 .film video { display: block; width: min(100%, 960px); margin: auto; background: #142631; }
-.footnote { padding: 0 28px 16px; }
 footer { margin-top: 32px; color: #70817d; font-size: 12px; }
 @media(max-width: 760px) { main { padding: 28px 16px; } .grid { grid-template-columns: 1fr; } .heading { padding: 20px; } .timeline-stage { height: 270px; } }

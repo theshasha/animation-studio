@@ -76,7 +76,7 @@ npm install --save-exact <包名>@<目标版本>
 
 开发依赖加 `-D`，依赖清单与锁文件一起保存。项目使用精确版本，`npm outdated` 的 Wanted 与 Latest 可能不同。
 
-更新时关注实际集成关系：React 与 R3F，Three.js 与 R3F / Remotion / 类型声明，GSAP 与 React / Remotion 集成，Tweakpane 与其核心类型，以及 Vite / ESLint 对 Node、TypeScript 的支持。p5 与 p5.brush 的回归范围见 [工具演示](../src/projects/tool-check/README.md)。
+更新时关注实际集成关系：React 与 R3F，Three.js 与 R3F / Remotion / 类型声明，GSAP 与 React / Remotion 集成，Tweakpane 与其核心类型，以及 Vite / ESLint 对 Node、TypeScript 的支持。p5 实例生命周期等回归范围见 [工具演示](../src/projects/tool-check/README.md)。
 
 ### Playwright、Node 与 FFmpeg
 
