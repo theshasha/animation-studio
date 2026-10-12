@@ -24,7 +24,7 @@ npm run dev:video
 | p5.js 粒子 | 连续绘制、鼠标避让 |
 | Three.js / Tweakpane | 自动旋转、拖拽相机、调整速度与材质颜色 |
 | GSAP / React | 时间轴暂停、定位和继续 |
-| Remotion 视频 | H.264、960×540、30 fps、5 秒；网页播放与定位，导出验证见 [视频说明](video/README.md) |
+| Remotion 视频 | 网页播放与定位；规格及导出验证见 [视频说明](video/README.md) |
 
 ## 重跑检查
 
@@ -36,14 +36,14 @@ npm run build:web -- tool-check
 node scripts/check-tools.mjs
 ```
 
-浏览器脚本覆盖上述交互、390px 布局、连续刷新、卸载重挂、p5 异步初始化期间卸载，以及 JS 异常与 console.error。重挂入口和初始化延迟通过测试网络层注入，不改写源码或文件时间戳。
+浏览器脚本覆盖上述交互、390px 布局、连续刷新、卸载重挂、p5 异步初始化期间卸载，以及 JS 异常与 console.error。
 
-每次结果写入新的 `output/tool-check/web/<运行编号>/` 子目录，运行编号由时间戳和随机后缀组成，实际路径打印到终端：
+检查结果写入 `output/tool-check/web/<运行编号>/`，实际路径打印到终端：
 
-- `checks.json`：通过项、粒子像素测量和错误。
+- `checks.json`：整体结果 `status`、完成或失败阶段 `stage`、通过项、粒子像素测量、网页错误及脚本失败原因 `failures`。
 - `desktop.png`、`mobile.png` 及局部截图：布局与绘制结果。
 
-`output/` 不随仓库提交。检查记录以各次运行的 `checks.json` 为准。
+检查记录以各次运行的 `checks.json` 为准。启动、检查、关闭浏览器或保存报告失败均返回非零退出码；报告无法写入时，从终端查看失败原因。
 
 ## 尚未覆盖
 

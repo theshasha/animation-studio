@@ -17,7 +17,8 @@
     "still": "remotion still src/video/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src vite.config.ts",
-    "check": "npm run typecheck && npm run lint"
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "check": "npm run check:syntax && npm run typecheck && npm run lint"
   },
   "dependencies": {
     "@gsap/react": "2.1.2",

@@ -3,16 +3,23 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 
 const outputRoot = "output/tool-check/web";
-await mkdir(outputRoot, { recursive: true });
-const runId = new Date().toISOString().replace(/[:.]/g, "-");
-const output = await mkdtemp(`${outputRoot}/${runId}-`);
-const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: 1440, height: 1100 }, deviceScaleFactor: 1 });
+let output;
+let browser;
+let page;
+let stage = "创建输出目录";
 const errors = [];
 const checks = [];
 const measurements = {};
-page.on("pageerror", e => errors.push(e.message));
-page.on("console", msg => { if (msg.type() === "error") errors.push(msg.text()); });
+const failures = [];
+const recordFailure = (failedStage, error) => {
+  failures.push({
+    stage: failedStage,
+    message: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+  });
+  console.error(`检查失败：${failedStage}`, error);
+  process.exitCode = 1;
+};
 const pixels = locator => locator.evaluate(canvas => {
   const copy = document.createElement("canvas");
   copy.width = canvas.width; copy.height = canvas.height;
@@ -40,19 +47,32 @@ const ready = async () => {
   }
 };
 try {
+  await mkdir(outputRoot, { recursive: true });
+  const runId = new Date().toISOString().replace(/[:.]/g, "-");
+  output = await mkdtemp(`${outputRoot}/${runId}-`);
+  stage = "启动浏览器";
+  browser = await chromium.launch({ headless: true });
+  stage = "创建页面";
+  page = await browser.newPage({ viewport: { width: 1440, height: 1100 }, deviceScaleFactor: 1 });
+  page.on("pageerror", e => errors.push(e.message));
+  page.on("console", msg => { if (msg.type() === "error") errors.push(msg.text()); });
+  stage = "打开页面";
   await page.goto("http://127.0.0.1:5173");
   for (const id of ["particles", "three"]) {
+    stage = `初始化画布：${id}`;
     await page.waitForSelector(`[data-testid="${id}"][data-ready="true"]`, { timeout: 60000 });
     const canvas = page.locator(`[data-testid="${id}"] canvas`);
     assert.equal(await canvas.count(), 1);
     await canvas.screenshot({ path: `${output}/${id}.png` });
     checks.push(`${id}：画布初始化并截图`);
   }
+  stage = "粒子鼠标交互";
   const particles = page.getByTestId("particles");
   await particles.hover({ position: { x: 110, y: 90 } });
   await page.waitForFunction(() => document.querySelector('[data-testid="particles"]').dataset.pointer !== "0,0");
   checks.push(`p5 鼠标坐标：${await particles.getAttribute("data-pointer")}`);
 
+  stage = "三维相机交互";
   const three = page.getByTestId("three");
   await three.scrollIntoViewIfNeeded();
   const box = await three.boundingBox();
@@ -61,6 +81,7 @@ try {
   await page.mouse.move(box.x + 240, box.y + 150, { steps: 10 }); await page.mouse.up();
   assert.notEqual(await three.getAttribute("data-camera"), beforeCamera);
   checks.push("Three.js：鼠标拖动改变相机位置");
+  stage = "Tweakpane 参数调整";
   const inputs = page.getByTestId("tweakpane").locator('input[type="text"]');
   await inputs.nth(0).fill("0"); await inputs.nth(0).press("Enter");
   const rotation = await three.getAttribute("data-rotation");
@@ -71,6 +92,7 @@ try {
   await three.screenshot({ path: `${output}/three-adjusted.png` });
   checks.push("Tweakpane：旋转速度设为 0 后保持静止，颜色绑定生效");
 
+  stage = "GSAP 时间轴控制";
   await page.getByRole("button", { name: "暂停时间轴" }).click();
   const orb = page.locator(".orb").first();
   const paused = await orb.evaluate(el => getComputedStyle(el).transform);
@@ -84,6 +106,7 @@ try {
   await page.waitForFunction(previous => getComputedStyle(document.querySelector('.orb')).transform !== previous, sought);
   checks.push("GSAP：暂停保持变换，定位进度改变画面，继续恢复播放");
 
+  stage = "视频播放与定位";
   const video = page.locator("video");
   await video.scrollIntoViewIfNeeded();
   const metadata = await video.evaluate(async el => {
@@ -96,12 +119,14 @@ try {
   await page.waitForFunction(() => document.querySelector('video').readyState >= 2);
   await video.screenshot({ path: `${output}/video-playback.png` });
   checks.push("导出 MP4：浏览器识别 960×540 / 5 秒，播放推进并可定位到 2.5 秒");
+  stage = "桌面与移动布局";
   await page.screenshot({ path: `${output}/desktop.png`, fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   await page.screenshot({ path: `${output}/mobile.png`, fullPage: true });
   checks.push("390px 移动布局：无横向溢出");
   await page.setViewportSize({ width: 1440, height: 1100 });
+  stage = "连续刷新";
   for (let i = 0; i < 3; i++) {
     await page.reload(); await ready();
     const canvas = page.getByTestId("particles").locator("canvas");
@@ -111,6 +136,7 @@ try {
   }
   checks.push("连续 3 次刷新：粒子持续绘制，粒子与三维画布各一个");
 
+  stage = "粒子避让";
   // 只在测试网络层注入 React 重挂入口和 p5 初始化延迟，不改产品代码。
   await page.route("**/src/projects/tool-check/web/CanvasLab.tsx*", async route => {
     const response = await route.fetch();
@@ -138,6 +164,7 @@ try {
   await page.evaluate(() => { window.__freezeParticles = false; });
   checks.push("粒子避让：测试中固定动画时间，移动指针后实际像素变化超过 500，排除自然动画干扰");
 
+  stage = "卸载与重挂";
   for (let i = 0; i < 3; i++) {
     await page.evaluate(() => {
       window.__oldHosts = Array.from(document.querySelectorAll('[data-testid="particles"], [data-testid="three"]'));
@@ -152,6 +179,7 @@ try {
     await ready();
   }
   checks.push("连续 3 次卸载/重挂：粒子与三维无重复画布，旧实例停止更新");
+  stage = "异步初始化期间卸载";
   await page.evaluate(() => { window.__holdParticle = true; window.__toolCheckClear(); });
   await page.waitForSelector('[data-testid="particles"]', { state: "detached" });
   await page.evaluate(() => window.__toolCheckRender());
@@ -165,10 +193,30 @@ try {
   await ready();
   checks.push("粒子 presetup 延迟期间卸载：恢复后无遗留画布、没有绘制或循环，重新挂载正常");
   await page.screenshot({ path: `${output}/remounted.png`, fullPage: true });
+  stage = "网页错误检查";
   assert.deepEqual(errors, []);
   checks.push("无 JavaScript 异常或 console.error");
+} catch (error) {
+  recordFailure(stage, error);
 } finally {
-  await writeFile(`${output}/checks.json`, JSON.stringify({ checks, measurements, errors }, null, 2));
-  console.log(JSON.stringify({ output, checks, measurements, errors }, null, 2));
-  await browser.close();
+  try {
+    await browser?.close();
+  } catch (error) {
+    recordFailure("关闭浏览器", error);
+  }
+  const report = {
+    status: failures.length ? "failed" : "passed",
+    stage: failures[0]?.stage ?? "完成",
+    checks, measurements, errors, failures,
+  };
+  if (output) {
+    try {
+      await writeFile(`${output}/checks.json`, JSON.stringify(report, null, 2));
+    } catch (error) {
+      recordFailure("保存报告", error);
+      report.status = "failed";
+      report.stage = failures[0].stage;
+    }
+  }
+  console.log(JSON.stringify({ output, ...report }, null, 2));
 }

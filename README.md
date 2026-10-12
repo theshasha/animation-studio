@@ -1,10 +1,11 @@
 # 动画工作室
 
-用于创作动画视频、生成艺术和交互网页。各作品共用一套 npm 依赖，源码和设计分别放在 `src/projects/<作品名>/`。
+用于创作动画视频、生成艺术和交互网页。各作品共用一套 npm 依赖，作品源码与说明放在 `src/projects/<作品名>/`。
 
 工具包括 React / Vite、Remotion、p5.js、Three.js / React Three Fiber、GSAP、Tweakpane，以及 Playwright。依赖版本见 `package.json` 和锁文件；环境使用 Node.js 24 与本机 FFmpeg / ffprobe。
 
 - [项目协作与目录约定](AGENTS.md)
+- [设计资源与使用方法](docs/design-resources.md)
 - [安装、恢复和更新](docs/setup-and-updates.md)
 - [工具演示与验证状态](src/projects/tool-check/README.md)
 - [技能来源](.agents/SOURCES.md)
@@ -33,26 +34,18 @@ npm run dev:video
 
 ### 视频
 
-将作品组件放在对应作品目录，在 `src/video/Root.tsx` 注册 Composition，并把视频源码路径加入 `eslint.config.mjs` 的 Remotion 专用规则范围。
-
-作品设计与反馈放在作品目录；素材、公共代码及输出目录的职责见 [项目约定](AGENTS.md)。
+将作品组件放在对应作品目录，在 `src/video/Root.tsx` 注册 Composition，并把视频源码路径加入 `eslint.config.mjs` 的 Remotion 专用规则范围。视频帧规则仅应用于视频源码。
 
 ## 检查与构建
 
-```bash
-npm run check
-npm run build:web -- tool-check
-npm run build:video
-```
-
-| 操作 | 输出或用途 |
+| 命令 | 输出或用途 |
 | --- | --- |
-| `check` | TypeScript 与 ESLint 检查 |
-| `build:web -- <作品名>` | 指定网页作品，输出到 `output/web/` |
-| `preview:web` | 预览最近一次网页构建 |
-| `build:video` | Remotion 渲染包，输出到 `output/bundle/` |
+| `npm run check` | JavaScript 语法、TypeScript 与 ESLint 检查 |
+| `npm run build:web -- <作品名>` | 指定网页作品，输出到 `output/web/` |
+| `npm run preview:web` | 预览最近一次网页构建 |
+| `npm run build:video` | Remotion 渲染包，输出到 `output/bundle/` |
 
-两种构建都会包含整个 `public/`，素材整理要求见项目约定。工具演示的浏览器回归方法见 [tool-check](src/projects/tool-check/README.md#重跑检查)。
+`npm run check:syntax` 可单独检查根目录直属及 `scripts/`、`src/` 下的 `.js`、`.mjs`、`.cjs` 文件，递归扫描时跳过依赖和生成目录。浏览器回归方法见 [tool-check](src/projects/tool-check/README.md#重跑检查)。
 
 ## 导出
 
@@ -68,7 +61,7 @@ npm run still -- EnvironmentCheck output/environment-check/frame.png --frame=30
 npm run render -- <作品ID> output/<作品名>/<版本>.mp4
 ```
 
-输出使用可辨识的版本名；覆盖已有输出默认关闭。工具演示的视频规格、导出和复测方法见 [视频说明](src/projects/tool-check/video/README.md)。
+覆盖已有输出默认关闭。视频导出和复测示例见 [视频说明](src/projects/tool-check/video/README.md#导出与复测)。
 
 ## 开源与仓库内容
 
